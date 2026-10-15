@@ -6,4 +6,5 @@ export type PayableAccountsQuery = {
   operacao: PayableOperation;
   dataInicial: string;
   dataFinal: string;
+  limite?: number;
 };

@@ -4,11 +4,15 @@ import OpenAI from 'openai';
 import { AiToolExecutor } from './ai-tool.executor';
 import { AI_TOOLS } from './ai.tools';
 
-const SYSTEM_PROMPT = `
+function systemPrompt() {
+  return `
 Você é um assistente de análise de dados.
 Responda usando somente os dados autorizados do sistema.
 Use as ferramentas disponíveis para consultar indicadores.
+Datas em YYYY-MM-DD. Se a pergunta citar só o mês, use o ano ${new Date().getFullYear()}.
+Se pedirem os N primeiros, preencha limite.
 `;
+}
 
 @Injectable()
 export class AiService {
@@ -31,7 +35,7 @@ export class AiService {
     const response = await this.client.chat.completions.create({
       model: this.model,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt() },
         { role: 'user', content: question },
       ],
       tools: AI_TOOLS,
