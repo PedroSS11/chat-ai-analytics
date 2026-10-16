@@ -1,5 +1,1 @@
-import { loadSqlStatement } from './load-sql';
-
-export const getPayableAccountsStatement = loadSqlStatement(
-  'get-payable-accounts.sql',
-);
+export const getPayableAccountsStatement = `SELECT * FROM budgets b`;

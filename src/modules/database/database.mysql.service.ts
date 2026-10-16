@@ -1,8 +1,9 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createPool, Pool } from 'mysql2/promise';
+import { createPool, Pool, QueryValues } from 'mysql2/promise';
 import { DatabaseServiceInterface } from './database.interface';
-import { compileQuery, SqlStatement } from './sql/load-sql';
+
+type SqlStatement = { sql: string };
 
 @Injectable()
 export class DatabaseMySqlService
@@ -24,15 +25,25 @@ export class DatabaseMySqlService
     });
   }
 
+  private validateParams(params: object): QueryValues {
+    return {};
+  }
+
+  private buildFullStatement(sql: string): string {
+    // COLOCAR OS WHERE
+    
+
+    return sql;
+  }
+
   async select<T = Record<string, unknown>>(
     statement: SqlStatement,
     params: object,
   ): Promise<T[]> {
-    const { sql, values } = compileQuery(statement, params, 'mysql');
-    console.log(sql);
-    console.log(values);
-    const [rows] = await this.pool.query(sql, values);
-    console.log(rows[0]);
+    const values = this.validateParams(params);
+    const statementCompletion = this.buildFullStatement(statement.sql);
+
+    const [rows] = await this.pool.query(statementCompletion, values);
     return Array.isArray(rows) ? (rows as T[]) : [];
   }
 
