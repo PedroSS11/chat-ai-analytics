@@ -1,8 +1,5 @@
-import { SqlStatement } from './sql/load-sql';
+import { AnalyticalQuery } from './sql/analytical-query';
 
 export interface DatabaseServiceInterface {
-  select<T = Record<string, unknown>>(
-    statement: SqlStatement,
-    params: object,
-  ): Promise<T[]>;
+  query<T = Record<string, unknown>>(query: AnalyticalQuery): Promise<T[]>;
 }

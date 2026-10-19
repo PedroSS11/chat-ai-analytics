@@ -1,13 +1,22 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import oracledb from 'oracledb';
 import { DatabaseServiceInterface } from './database.interface';
-import { compileQuery, SqlStatement } from './sql/load-sql';
+import {
+  AnalyticalQuery,
+  compileAnalyticalQuery,
+} from './sql/analytical-query';
 
 @Injectable()
 export class DatabaseOracleService
   implements DatabaseServiceInterface, OnModuleInit, OnModuleDestroy
 {
+  private readonly logger = new Logger(DatabaseOracleService.name);
   private pool?: Awaited<ReturnType<typeof oracledb.createPool>>;
 
   constructor(private readonly config: ConfigService) {}
@@ -20,15 +29,15 @@ export class DatabaseOracleService
     });
   }
 
-  async select<T = Record<string, unknown>>(
-    statement: SqlStatement,
-    params: object,
+  async query<T = Record<string, unknown>>(
+    query: AnalyticalQuery,
   ): Promise<T[]> {
     if (!this.pool) {
       throw new Error('Pool Oracle ainda não iniciado');
     }
 
-    const { sql, namedBinds } = compileQuery(statement, params, 'oracle');
+    const { sql, namedBinds } = compileAnalyticalQuery(query, 'oracle');
+    this.logger.debug(`${sql} ${JSON.stringify(namedBinds)}`);
     const connection = await this.pool.getConnection();
 
     try {

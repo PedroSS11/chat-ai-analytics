@@ -1,14 +1,18 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createPool, Pool } from 'mysql2/promise';
 import { DatabaseServiceInterface } from './database.interface';
-import { compileQuery, SqlStatement } from './sql/load-sql';
+import {
+  AnalyticalQuery,
+  compileAnalyticalQuery,
+} from './sql/analytical-query';
 
 @Injectable()
 export class DatabaseMySqlService
   implements DatabaseServiceInterface, OnModuleDestroy
 {
   private readonly pool: Pool;
+  private readonly logger = new Logger(DatabaseMySqlService.name);
 
   constructor(config: ConfigService) {
     const port = config.get<string>('MYSQL_PORT');
@@ -24,15 +28,12 @@ export class DatabaseMySqlService
     });
   }
 
-  async select<T = Record<string, unknown>>(
-    statement: SqlStatement,
-    params: object,
+  async query<T = Record<string, unknown>>(
+    query: AnalyticalQuery,
   ): Promise<T[]> {
-    const { sql, values } = compileQuery(statement, params, 'mysql');
-    console.log(sql);
-    console.log(values);
+    const { sql, values } = compileAnalyticalQuery(query, 'mysql');
+    this.logger.debug(`SQL : ${sql} ${JSON.stringify(values)}`);
     const [rows] = await this.pool.query(sql, values);
-    console.log(rows[0]);
     return Array.isArray(rows) ? (rows as T[]) : [];
   }
 

@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DatabaseServiceInterface } from '../database/database.interface';
 import { DATABASE_TOKEN } from '../database/database.token';
-import { getPayableAccountsStatement } from '../database/sql/get-payable-accounts';
-import { PayableAccountsQuery } from './payable-accounts';
+import { buildAnalyticalQuery } from './query/build-query';
 
 @Injectable()
 export class AnalyticsService {
@@ -11,7 +10,7 @@ export class AnalyticsService {
     private readonly databaseService: DatabaseServiceInterface,
   ) {}
 
-  async getPayableAccounts(params: PayableAccountsQuery) {
-    return this.databaseService.select(getPayableAccountsStatement, params);
+  async consultar(params: unknown) {
+    return this.databaseService.query(buildAnalyticalQuery(params));
   }
 }
